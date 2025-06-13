@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>xG Calculator Tool</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f4f4f4;
+    }
+    .section {
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    input[type="number"] {
+      width: 80px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    table, th, td {
+      border: 1px solid #ddd;
+      text-align: center;
+    }
+    th, td {
+      padding: 10px;
+    }
+    th {
+      background-color: #f0f0f0;
+    }
+    .highlight {
+      background-color: #c6efce;
+    }
+  </style>
+</head>
+<body>
+  <div class="section">
+    <h2>xG Calculator Tool</h2>
+    <p>Introduceți valorile pentru xG și scorurile echipelor:</p>
+    <form id="xgForm">
+      <div>
+        <label>Home Team - xG: <input type="number" step="0.01" id="xgHome" required></label>
+        <label> | Scor: <input type="number" id="scoreHome" required></label>
+      </div>
+      <br>
+      <div>
+        <label>Away Team - xG: <input type="number" step="0.01" id="xgAway" required></label>
+        <label> | Scor: <input type="number" id="scoreAway" required></label>
+      </div>
+      <br>
+      <button type="button" onclick="calculate()">Calculează</button>
+    </form>
+  </div>
+
+  <div class="section">
+    <h3>Rezultate:</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Team</th>
+          <th>Current Score</th>
+          <th>xG</th>
+          <th>Match xG</th>
+          <th>XG Correct Score</th>
+          <th>Expected Correct Score</th>
+          <th>Expected Goals Now</th>
+          <th>xSxG</th>
+          <th>Team Goals Overdue</th>
+          <th>Total Goals Overdue</th>
+          <th>Current Projected Match Result</th>
+        </tr>
+      </thead>
+      <tbody id="output"></tbody>
+    </table>
+  </div>
+
+  <script>
+    function calculate() {
+      const xgHome = parseFloat(document.getElementById('xgHome').value);
+      const xgAway = parseFloat(document.getElementById('xgAway').value);
+      const scoreHome = parseInt(document.getElementById('scoreHome').value);
+      const scoreAway = parseInt(document.getElementById('scoreAway').value);
+
+      const matchXG = xgHome + xgAway;
+
+      const xgCorrectHome = Math.min(xgHome + (scoreHome * 0.2) + 0.35, xgHome * 1.8);
+      const xgCorrectAway = Math.min(xgAway + (scoreAway * 0.2) + 0.35, xgAway * 1.8);
+
+      const expectedCorrectHome = Math.round(xgCorrectHome);
+      const expectedCorrectAway = Math.round(xgCorrectAway);
+
+      const expectedGoalsNow = expectedCorrectHome + expectedCorrectAway;
+      const xsxgHome = xgCorrectHome - scoreHome;
+      const xsxgAway = xgCorrectAway - scoreAway;
+
+      const overdueHome = Math.round(xsxgHome);
+      const overdueAway = Math.round(xsxgAway);
+      const totalOverdue = overdueHome + overdueAway;
+
+      const result = (expectedCorrectHome > expectedCorrectAway) ? "Home Win" :
+                     (expectedCorrectAway > expectedCorrectHome ? "Away Win" : "Draw");
+
+      const highlightHome = (xsxgHome > 0 || overdueHome > 0) ? "highlight" : "";
+      const highlightAway = (xsxgAway > 0 || overdueAway > 0) ? "highlight" : "";
+
+      document.getElementById('output').innerHTML = `
+        <tr class="${highlightHome}">
+          <td>Home Team</td>
+          <td>${scoreHome}</td>
+          <td>${xgHome.toFixed(2)}</td>
+          <td>${matchXG.toFixed(2)}</td>
+          <td>${xgCorrectHome.toFixed(2)}</td>
+          <td>${expectedCorrectHome}</td>
+          <td>${expectedGoalsNow}</td>
+          <td>${xsxgHome.toFixed(2)}</td>
+          <td>${overdueHome}</td>
+          <td>${totalOverdue}</td>
+          <td>${result}</td>
+        </tr>
+        <tr class="${highlightAway}">
+          <td>Away Team</td>
+          <td>${scoreAway}</td>
+          <td>${xgAway.toFixed(2)}</td>
+          <td></td>
+          <td>${xgCorrectAway.toFixed(2)}</td>
+          <td>${expectedCorrectAway}</td>
+          <td></td>
+          <td>${xsxgAway.toFixed(2)}</td>
+          <td>${overdueAway}</td>
+          <td></td>
+          <td></td>
+        </tr>
+      `;
+    }
+  </script>
+</body>
+</html>
